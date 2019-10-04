@@ -1,0 +1,99 @@
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<link href="style.css" rel="stylesheet" type="text/css" />
+		<script>
+			const LAST_X_PICTURES = 15;
+			const DISPLAY_TIME_IN_MS = 10000;
+			const REDIRECT_URI = 'http://7g-dev-instagram-thing.s3-website-us-west-2.amazonaws.com';
+			const CLIENT_ID = '78f9ad6921f24b2fb1a82d46b97c43e6';
+
+			function getHashParams() {
+
+			    const hashParams = {};
+			    var  e,
+			        a = /\+/g,  // Regex for replacing addition symbol with a space
+			        r = /([^&;=]+)=?([^&;]*)/g,
+			        d = function (s) { return decodeURIComponent(s.replace(a, " ")); },
+			        q = window.location.hash.substring(1);
+
+			    while (e = r.exec(q))
+			       hashParams[d(e[1])] = d(e[2]);
+
+			    return hashParams;
+			}
+
+			function forceLogin() {
+			    window.location.href = `https://api.instagram.com/oauth/authorize/?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=token`;
+			}
+
+			function displayPicture(pictureData) {
+				const images = pictureData.images;
+				if (!images) {
+					return false;
+				}
+
+				const standardResolution = images.standard_resolution;
+				if (!standardResolution) {
+					return false;
+				}
+
+				const url = standardResolution.url;
+				const imgEl = document.getElementById('currentImage');
+				imgEl.src = url;
+
+				const likeCount = pictureData.likes.count;
+				const likesEl = document.getElementById('likes');
+				likes.innerText = `❤️ ${likeCount}`
+
+				const captionEl = document.getElementById('caption');
+				if (pictureData.caption) {
+					const caption = pictureData.caption.text;
+					captionEl.innerText = caption;
+				} else {
+					captionEl.innerText = '';
+				}
+			}
+
+
+			(function() {
+				const params = getHashParams();
+				const access_token = params.access_token;
+				if (!access_token) {
+				    forceLogin();
+				}
+
+				const url = `https://api.instagram.com/v1/users/self/media/recent/?access_token=${access_token}&count=${LAST_X_PICTURES}`;
+				fetch(url).then(function(response) {
+					response.json().then(function(data) {
+				        console.log(data);
+				        const images = data.data;
+
+				        let currentIndex = 0;
+				        displayPicture(images[currentIndex]);
+
+				        setInterval(function() {
+				        	currentIndex += 1;
+				        	if (currentIndex >= images.length) {
+				        		currentIndex = 0;
+				        	}
+				        	displayPicture(images[currentIndex]);
+				        }, DISPLAY_TIME_IN_MS);
+
+				    });
+				}).catch(function(error) {
+					console.log(error);
+				})
+
+			})();
+		</script>
+	</head>
+	<body>
+		<div><h1>Life in the Nest</h1>
+		<div id=container>
+			<img id="currentImage" />
+			<div id="caption"></div>
+			<div id="likes"></div>
+		</div>
+	</body>
+</html>

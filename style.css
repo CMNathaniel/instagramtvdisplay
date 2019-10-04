@@ -1,0 +1,23 @@
+body {
+    background-color: #004f7b;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    padding-top: 40px;
+    font-size: 30px;
+    color: white;
+    font-family:Helvetica, Arial, sans-serif;
+}
+
+
+
+#currentImage {
+    border-radius: 10px;
+}
+
+.h1, #caption, #likes {
+  padding-top: 20px;
+}
+
+
+/*Open Sans","Helvetica Neue",
